@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Vuelo · Listo para la U</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Lora:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F1EB;--bg2:#ECEADF;--bg3:#E4E1D5;
+  --ink:#1A1814;--ink2:#5A5650;--ink3:#9A9690;
+  --white:#FDFCF8;--border:rgba(26,24,20,0.1);--border2:rgba(26,24,20,0.06);
+  --f1:#1B3A6B;--f1l:#E8EEF8;--f1m:#4A72B0;
+  --f2:#7C2D12;--f2l:#F9EDE8;--f2m:#C4622D;
+  --f3:#4C1D95;--f3l:#F0EBF8;--f3m:#7C3AED;
+  --f4:#065F46;--f4l:#E6F4EF;--f4m:#059669;
+  --r:8px;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes slideIn{from{opacity:0;transform:translateX(5px)}to{opacity:1;transform:translateX(0)}}
+.app{display:flex;height:100vh;overflow:hidden;}
+.sidebar{width:220px;background:var(--ink);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sb-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.sb-tag{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(247,244,235,0.4);margin-bottom:4px;}
+.sb-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#F4F1EB;line-height:1.2;letter-spacing:-.01em;}
+.sb-name span{font-weight:400;opacity:.6;}
+.sb-group{padding:14px 12px 2px;}
+.sb-group-label{font-size:9px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:rgba(247,244,235,0.25);padding:0 4px;margin-bottom:3px;}
+.sb-item{display:flex;align-items:center;gap:7px;padding:7px 6px;border-radius:5px;cursor:pointer;font-size:11.5px;color:rgba(247,244,235,0.45);background:none;border:none;width:100%;text-align:left;transition:all .15s;font-family:'DM Mono',monospace;}
+.sb-item:hover{background:rgba(255,255,255,0.06);color:#F4F1EB;}
+.sb-item.active{color:#F4F1EB;}
+.sb-item.f1.active{background:rgba(27,58,107,0.3);}
+.sb-item.f2.active{background:rgba(124,45,18,0.3);}
+.sb-item.f3.active{background:rgba(76,29,149,0.3);}
+.sb-item.f4.active{background:rgba(6,95,70,0.3);}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:rgba(247,244,235,0.15);flex-shrink:0;transition:background .2s;}
+.sb-item.f1.active .sb-dot{background:var(--f1m);}
+.sb-item.f2.active .sb-dot{background:var(--f2m);}
+.sb-item.f3.active .sb-dot{background:var(--f3m);}
+.sb-item.f4.active .sb-dot{background:var(--f4m);}
+.sb-item.done .sb-dot{background:rgba(100,200,150,0.6);}
+.sb-check{margin-left:auto;font-size:9px;color:rgba(100,200,150,0.7);opacity:0;transition:opacity .2s;}
+.sb-item.done .sb-check{opacity:1;}
+.sb-footer{margin-top:auto;padding:14px 18px;border-top:1px solid rgba(255,255,255,0.06);}
+.sb-pct-row{display:flex;justify-content:space-between;font-size:9.5px;color:rgba(247,244,235,0.28);margin-bottom:6px;}
+.sb-bar{height:2px;background:rgba(255,255,255,0.08);border-radius:1px;overflow:hidden;}
+.sb-fill{height:100%;border-radius:1px;transition:width .5s ease;}
+.btn-clear{display:block;width:calc(100% - 28px);margin:8px 14px 14px;padding:7px;background:none;border:1px solid rgba(255,255,255,0.1);border-radius:5px;color:rgba(255,255,255,0.3);font-size:10px;cursor:pointer;text-align:center;font-family:'DM Mono',monospace;transition:all .15s;}
+.btn-clear:hover{color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.25);}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-bc{font-size:11.5px;color:var(--ink3);}
+.topbar-bc strong{color:var(--ink);font-weight:500;}
+.topbar-save{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ink3);}
+.save-dot{width:5px;height:5px;border-radius:50%;background:#6FCF97;}
+.workspace{flex:1;display:flex;overflow:hidden;}
+.form-panel{flex:1;padding:24px 24px 40px;overflow-y:auto;border-right:1px solid var(--border2);}
+.form-panel::-webkit-scrollbar{width:3px;}
+.form-panel::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.07);border-radius:2px;}
+.session-nav{background:var(--white);border-bottom:1px solid var(--border2);padding:0 24px;display:flex;gap:2px;overflow-x:auto;flex-shrink:0;}
+.session-nav::-webkit-scrollbar{display:none;}
+.nav-btn{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--ink3);background:none;border:none;padding:10px 14px 8px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;text-transform:uppercase;}
+.nav-btn:hover{color:var(--ink);}
+.nav-btn.active{color:var(--ink);border-bottom-color:var(--ink);}
+.nav-btn.f1.active{color:var(--f1);border-bottom-color:var(--f1);}
+.nav-btn.f2.active{color:var(--f2);border-bottom-color:var(--f2);}
+.nav-btn.f3.active{color:var(--f3);border-bottom-color:var(--f3);}
+.nav-btn.f4.active{color:var(--f4);border-bottom-color:var(--f4);}
+.nav-dot-small{display:inline-block;width:4px;height:4px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+.eyebrow{font-size:9.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.sec-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--ink);margin-bottom:6px;line-height:1.1;letter-spacing:-.02em;}
+.sec-pregunta{font-family:'Lora',serif;font-size:13px;font-style:italic;color:var(--ink2);margin-bottom:20px;line-height:1.5;}
+.concepto-vuelo{border-radius:var(--r);padding:14px 16px;margin-bottom:18px;border-left:3px solid;}
+.concepto-vuelo-label{font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px;}
+.concepto-vuelo-text{font-family:'Lora',serif;font-size:13px;line-height:1.7;font-style:italic;}
+.concepto-cuando{margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.07);}
+.concepto-cuando-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+.concepto-cuando-text{font-size:11.5px;line-height:1.6;}
+.kit-box{border-radius:var(--r);padding:12px 14px;margin-bottom:18px;border:1px solid var(--border);}
+.kit-label{font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;}
+.kit-content{font-size:12px;line-height:1.7;color:var(--ink2);}
+.field-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;transition:border-color .15s;}
+.field-card:focus-within{border-color:rgba(100,100,200,0.25);}
+.field-label{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;}
+.field-hint{font-size:11.5px;color:var(--ink3);font-style:italic;margin-bottom:8px;font-family:'Lora',serif;}
+textarea,input[type="text"]{width:100%;border:1px solid var(--border);border-radius:5px;background:var(--bg);padding:9px 11px;font-family:'DM Mono',monospace;font-size:12.5px;line-height:1.6;color:var(--ink);outline:none;transition:border-color .15s,background .15s;}
+textarea{resize:vertical;}
+textarea:focus,input[type="text"]:focus{border-color:rgba(100,100,200,0.3);background:#fff;}
+textarea::placeholder,input::placeholder{color:var(--ink3);font-style:italic;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.lema-wrap{border-top:1px solid var(--border);padding-top:14px;margin-top:4px;}
+.lema-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);text-align:center;margin-bottom:8px;}
+.lema-input{font-family:'Lora',serif;font-size:16px;font-style:italic;color:var(--ink);background:transparent;border:none;border-bottom:1.5px solid var(--border);width:100%;padding:7px 4px;text-align:center;outline:none;transition:border-color .2s;}
+.lema-input:focus{border-bottom-color:var(--ink2);}
+.lema-input::placeholder{color:var(--ink3);font-style:italic;}
+.fortaleza-block{border:1px solid var(--border);border-radius:5px;overflow:hidden;margin-bottom:8px;}
+.fortaleza-num{padding:7px 12px 5px;font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;border-bottom:1px solid var(--border);}
+.fortaleza-fields{padding:10px 12px;display:flex;flex-direction:column;gap:8px;background:var(--white);}
+.recurso-block{border:1px solid var(--border);border-radius:5px;overflow:hidden;margin-bottom:8px;}
+.recurso-num{padding:7px 12px 5px;font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;border-bottom:1px solid var(--border);}
+.recurso-fields{padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--white);}
+.contacto-row{display:flex;gap:10px;align-items:center;margin-bottom:8px;}
+.contacto-situacion{font-size:10.5px;color:var(--ink3);min-width:160px;flex-shrink:0;}
+.contacto-input{flex:1;}
+.nav-row{display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border2);}
+.btn{padding:9px 20px;border-radius:5px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all .15s;}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--ink);color:var(--bg);}
+.btn-primary:hover{background:#2D2520;}
+.btn-secondary{background:transparent;color:var(--ink2);border:1px solid var(--border);}
+.btn-secondary:hover{background:var(--bg2);}
+.f8-echo{background:var(--bg2);border-radius:5px;padding:12px 14px;margin-bottom:14px;border-left:3px solid var(--f1);}
+.f8-echo-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--f1m);margin-bottom:5px;}
+.f8-echo-text{font-family:'Lora',serif;font-size:12.5px;font-style:italic;color:var(--ink2);line-height:1.6;}
+.progress-wrap{margin-top:16px;}
+.progress-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.progress-label{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);}
+.progress-bar{height:2px;background:var(--border);border-radius:1px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:1px;transition:width .4s ease;}
+.intro-screen{padding:36px 28px;max-width:580px;}
+.intro-logo{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);margin-bottom:32px;}
+.intro-title{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1;margin-bottom:6px;}
+.intro-sub{font-family:'Lora',serif;font-size:15px;font-style:italic;color:var(--ink2);margin-bottom:32px;}
+.intro-phases{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin:28px 0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.intro-phase{padding:16px 12px;}
+.ip-num{font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;font-weight:500;}
+.ip-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:3px;line-height:1.15;}
+.ip-sessions{font-size:9.5px;color:var(--ink3);}
+.intro-quote{font-family:'Lora',serif;font-size:13px;font-style:italic;color:var(--ink2);line-height:1.7;max-width:460px;margin:0 auto 6px;}
+.intro-quote-attr{font-size:10.5px;color:var(--ink3);text-align:center;}
+.intro-name-wrap{max-width:300px;margin:28px auto 0;}
+.intro-name-label{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:7px;display:block;}
+.intro-name-input{font-family:'Lora',serif;font-size:18px;font-style:italic;width:100%;background:transparent;border:none;border-bottom:1.5px solid var(--border);padding:7px 0;outline:none;color:var(--ink);transition:border-color .2s;}
+.intro-name-input:focus{border-bottom-color:var(--ink);}
+.intro-name-input::placeholder{color:var(--ink3);}
+.intro-start{margin-top:28px;display:inline-flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--white);background:var(--ink);border:none;padding:12px 28px;border-radius:5px;cursor:pointer;transition:opacity .2s;}
+.intro-start:hover{opacity:.85;}
+.chat-panel{width:360px;flex-shrink:0;display:flex;flex-direction:column;background:#FAFAF8;overflow:hidden;}
+.chat-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;flex-shrink:0;background:var(--white);}
+.chat-av{width:28px;height:28px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;color:var(--bg);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;flex-shrink:0;}
+.chat-title{font-size:12.5px;font-weight:500;color:var(--ink);}
+.chat-subtitle{font-size:10.5px;color:var(--ink3);}
+.chat-status{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--ink3);margin-left:auto;}
+.status-dot{width:5px;height:5px;border-radius:50%;background:#6FCF97;}
+.status-dot.thinking{background:var(--f2m);animation:pulse 1s infinite;}
+.chat-msgs{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:9px;overflow-y:auto;}
+.chat-msgs::-webkit-scrollbar{width:3px;}
+.chat-msgs::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.07);border-radius:2px;}
+.msg{display:flex;gap:7px;align-items:flex-start;animation:slideIn .2s ease;}
+.msg.user{flex-direction:row-reverse;}
+.msg-av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;color:white;flex-shrink:0;}
+.msg-av.ai{background:var(--ink);font-family:'Syne',sans-serif;font-size:9px;}
+.msg-av.user{background:var(--ink2);}
+.msg-body{max-width:86%;padding:8px 12px;font-size:12.5px;line-height:1.65;border-radius:3px 10px 10px 10px;white-space:pre-wrap;}
+.msg.ai .msg-body{background:var(--white);color:var(--ink2);border:1px solid var(--border2);}
+.msg.user .msg-body{background:var(--ink);color:rgba(244,241,235,0.92);border-radius:10px 3px 10px 10px;}
+.typing-dots{display:flex;gap:3px;align-items:center;padding:2px 0;}
+.typing-dots span{width:4px;height:4px;border-radius:50%;background:var(--ink3);}
+.typing-dots span:nth-child(1){animation:bounce 1.2s 0s infinite;}
+.typing-dots span:nth-child(2){animation:bounce 1.2s .2s infinite;}
+.typing-dots span:nth-child(3){animation:bounce 1.2s .4s infinite;}
+.quick-wrap{padding:6px 12px 3px;display:flex;flex-wrap:wrap;gap:4px;flex-shrink:0;}
+.qbtn{font-size:10.5px;color:var(--ink2);background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:4px 10px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s;white-space:nowrap;}
+.qbtn:hover{background:var(--bg3);color:var(--ink);}
+.qbtn:disabled{opacity:.4;cursor:not-allowed;}
+.chat-input-area{padding:9px 12px 11px;border-top:1px solid var(--border2);flex-shrink:0;background:var(--white);}
+.chat-input-row{display:flex;gap:7px;align-items:flex-end;}
+.chat-input-row textarea{flex:1;min-height:38px;max-height:110px;padding:8px 11px;font-size:12px;border-radius:8px;resize:none;background:var(--bg);border:1px solid var(--border);font-family:'DM Mono',monospace;}
+.send-btn{width:34px;height:34px;border-radius:7px;background:var(--ink);border:none;cursor:pointer;color:white;font-size:13px;flex-shrink:0;transition:background .15s;display:flex;align-items:center;justify-content:center;}
+.send-btn:hover{background:#2D2520;}
+.send-btn:disabled{background:#ccc;cursor:not-allowed;}
+.input-hint{font-size:9.5px;color:var(--ink3);margin-top:4px;text-align:center;}
+.toast{position:fixed;bottom:18px;right:18px;background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:5px;font-size:12px;z-index:999;animation:fadeUp .25s ease;pointer-events:none;}
+@media(max-width:900px){.sidebar{display:none;}.chat-panel{width:300px;}}
+@media(max-width:640px){.workspace{flex-direction:column;}.chat-panel{width:100%;height:45%;}.form-panel{height:55%;}}
+</style>
+</head>
+<body>
+<div class="app">
+<nav class="sidebar" id="sidebar"></nav>
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-bc">Listo para la U &nbsp;›&nbsp; <strong id="bc-title">Manual de Vuelo</strong></div>
+    <div class="topbar-save"><div class="save-dot"></div> Guardado</div>
+  </div>
+  <div class="session-nav" id="session-nav" style="display:none"></div>
+  <div class="workspace">
+    <div class="form-panel" id="form-panel"></div>
+    <div class="chat-panel">
+      <div class="chat-header">
+        <div class="chat-av">K</div>
+        <div>
+          <div class="chat-title">KIBO</div>
+          <div class="chat-subtitle">Tu tutor · Listo para la U</div>
+        </div>
+        <div class="chat-status">
+          <div class="status-dot" id="status-dot"></div>
+          <span id="status-txt">Lista</span>
+        </div>
+      </div>
+      <div class="chat-msgs" id="chat-msgs"></div>
+      <div class="quick-wrap" id="quick-wrap"></div>
+      <div class="chat-input-area">
+        <div class="chat-input-row">
+          <textarea id="chat-input" placeholder="Escribe aquí…" rows="2" onkeydown="handleKey(event)"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendMsg()" title="Enviar">➤</button>
+        </div>
+        <div class="input-hint">Enter para enviar · Shift+Enter nueva línea</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+const SESSIONS=[
+  {id:0,num:'S1',label:'Punto de partida',fase:'Reconocimiento',faseIdx:1,pregunta:'¿Desde dónde parto realmente?'},
+  {id:1,num:'S2',label:'Ficha de misión',fase:'Reconocimiento',faseIdx:1,pregunta:'¿Qué es genuinamente mío?'},
+  {id:2,num:'S3',label:'Lo que cargo',fase:'Equipo de vuelo',faseIdx:2,pregunta:'¿Qué es mío y qué no elegí cargar?'},
+  {id:3,num:'S4',label:'Protocolo',fase:'Equipo de vuelo',faseIdx:2,pregunta:'¿Cómo funciono bajo presión?'},
+  {id:4,num:'S5',label:'Mapa de aprendizaje',fase:'Gravedad cero',faseIdx:3,pregunta:'¿Cómo aprendo yo?'},
+  {id:5,num:'S6',label:'En la tormenta',fase:'Gravedad cero',faseIdx:3,pregunta:'¿Cómo me hablo cuando algo no sale?'},
+  {id:6,num:'S7',label:'Brújula',fase:'Habitabilidad',faseIdx:4,pregunta:'¿Cómo decido cuando no hay manual?'},
+  {id:7,num:'S8',label:'Carta de despegue',fase:'Habitabilidad',faseIdx:4,pregunta:'¿Quién soy ahora? ¿Qué llevo?'},
+];
+const FASE_COLORS=['','--f1','--f1','--f2','--f2','--f3','--f3','--f4','--f4'];
+const FASE_CLASS=['','f1','f1','f2','f2','f3','f3','f4','f4'];
+const CONCEPTOS={
+  0:{texto:'Antes de cualquier misión, los astronautas hacen una evaluación honesta de su punto de partida. No para juzgarse — sino para saber exactamente desde dónde despegan. Sin ese mapa inicial, no hay forma de medir el viaje.',cuando:'Te va a servir cuando llegues a la U y sientas que no sabes quién eres en ese nuevo contexto. Volver a esta ficha te recuerda desde dónde partiste — y todo lo que ya eras antes de llegar.'},
+  1:{texto:'En la ISS, cada astronauta tiene una ficha de misión: qué hace, para qué sirve, qué tiene que no tiene nadie más. No es arrogancia — es claridad. Saber qué es genuinamente tuyo es el primer recurso que nadie te puede quitar.',cuando:'Te va a servir cuando alguien en la U sea mejor que tú en algo y sientas que no tienes nada que ofrecer. Tus fortalezas verificadas son reales — no te las inventaste, las viste aparecer en tu historia.'},
+  2:{texto:'Los astronautas aprenden a distinguir qué equipaje es esencial y qué sobrecarga la nave. Cargar con expectativas ajenas que nunca elegiste consume energía que necesitas para habitar el nuevo planeta.',cuando:'Te va a servir cuando sientas que estás estudiando para otros, eligiendo carrera para otros, o viviendo una versión de ti que no elegiste. Esta ficha te ayuda a ver qué es tuyo y qué puedes soltar.'},
+  3:{texto:'En la ISS, cada astronauta tiene un protocolo personal de regulación para emergencias: qué hace primero cuando algo falla. No se improvisa en el momento de la crisis — se practica antes, cuando todo está bien.',cuando:'Te va a servir en tu primera prueba difícil, cuando el grupo no funcione, cuando llegues a tu pieza después de un día terrible. Tu protocolo BASE ya existe — solo necesitas activarlo.'},
+  4:{texto:'Tu cerebro tiene dos modos: enfocado y disperso. El modo enfocado procesa activamente. El modo disperso trabaja en segundo plano mientras descansas. Los dos son necesarios — estudiar sin descansar no es más eficiente, es más lento. Y la información se consolida principalmente mientras duermes.',cuando:'Te va a servir cuando tengas tu primera semana de parciales y quieras estudiar todo la noche anterior. No funciona así. El método LEARN te da el camino: repartir, dormir entre sesiones, explicar en voz alta.'},
+  5:{texto:'En gravedad cero, todo lo que no está anclado flota. La voz con que te hablas a ti mismo cuando algo no sale es lo que más flota — y a veces la más difícil de escuchar. Aprender a distinguir el evento de la interpretación es una habilidad que se entrena.',cuando:'Te va a servir cuando reproches algo, cuando te compares con alguien y salgas perdiendo, cuando sientas que no eres suficiente. Tu frase reguladora propia es el ancla que vuelve a posarte.'},
+  6:{texto:'Los astronautas no tienen manual para cada situación que encuentran. Tienen criterios — principios internos que les permiten decidir en territorio desconocido. La U va a pedirte decisiones para las que no hay respuesta correcta. Necesitas saber cómo decides tú.',cuando:'Te va a servir cuando tengas que elegir una especialidad, cambiar de carrera, decidir si seguir en un grupo que no te hace bien, o decirle que no a algo que todos dicen que deberías hacer.'},
+  7:{texto:'El astronauta que regresa a la Tierra no es el mismo que despegó. El planeta al que vuelve tampoco es exactamente el mismo. Pero él sabe quién es — y eso es suficiente para aterrizar bien. Esta sesión es tu aterrizaje consciente: revisar el recorrido, nombrar lo que cambió, escribirle a quien viene.',cuando:'Te va a servir siempre. Esta ficha es el documento que construiste durante todo el programa. Cuando te sientas perdido en la U, vuelve aquí.'},
+};
+const KITS={
+  0:null,
+  1:{label:'Fortalezas — cómo usarlas',content:'Una fortaleza verificada es aquella que encontraste en tu propia historia — no en un test. Solo lo que puedes ver en experiencias concretas tiene peso real como recurso. En la U, úsalas intencionalmente: si tu fortaleza es la curiosidad, explota eso al explorar materias nuevas. Si es la persistencia, recuérdatela cuando algo cueste más de lo esperado.'},
+  2:{label:'CONNECT — tu tripulación en tierra',content:'Ningún astronauta vuela solo. Tiene Mission Control, tripulación y familia en tierra. Tú también necesitas saber a quién llamar antes de necesitarlo — no en el momento de la crisis. Cinco personas, cinco situaciones distintas. Identifícalas ahora, cuando estás bien.'},
+  3:{label:'BASE — protocolo de regulación',content:'B — Breathe: 3 respiraciones lentas (inhala 4 seg · sostén 2 · exhala 6)\nA — Anchor: nombra lo que está pasando. Una sola palabra.\nS — Stabilize: algo que es verdad de ti aunque todo lo demás se mueva.\nE — Engage: ¿qué es lo mínimo que puedo hacer ahora? Solo uno.\n\nSi después de BASE sigues igual → activa CONNECT.'},
+  4:{label:'LEARN — método de estudio',content:'L — Look: paseo general antes de leer (títulos, imágenes, índice)\nE — Engage: lee o mira activamente · toma notas a mano · Pomodoro de 25 min\nA — Act: cierra el material · escribe lo que recuerdas sin mirar\nR — Repeat: repasa en voz alta 4 días · explícaselo a alguien\nN — Night: duerme entre sesiones · el cerebro consolida mientras duermes\n\nApps: Forest (Pomodoro) · Mindomo (mapas) · Quizlet (fichas) · Notion (organización)'},
+  5:{label:'Evento vs interpretación',content:'Lo que pasó (solo los hechos) es una cosa. Lo que te dijiste a ti mismo sobre lo que pasó es otra. La distancia entre los dos es donde vive tu libertad. Practica esta separación cada vez que algo no salga como esperabas — no para negarlo, sino para verlo más claro.'},
+  6:{label:'ORBIT — rituales de ritmo',content:'Inicio del día ☀️: 3 respiraciones · una intención para hoy · no teléfono los primeros 10 min\nCierre del día 🌙: 3 cosas que salieron bien · algo que aprendí · pantallas off 30 min antes de dormir\n\nNo es perfección — es consistencia básica. Una órbita estable es lo que te mantiene en el nuevo planeta.'},
+  7:{label:'Flight Kit completo — 5 Puntos de Equilibrio',content:'BASE · CONNECT · LEARN · CORE · ORBIT\n\nCinco protocolos. Cinco puntos donde las fuerzas se equilibran cuando todo tira en distintas direcciones. Al terminar este programa, tu Flight Kit personalizado vive en tu teléfono — listo para cuando lo necesites.'},
+};
+const QUICK={
+  0:['¿Qué te quedó de la sesión?','¿Qué parte te costó más escribir?','¿Qué descubriste de ti?'],
+  1:['¿Cómo elegiste esa fortaleza?','¿Cuándo más apareció eso en tu vida?','¿Cómo la vas a usar en la U?'],
+  2:['¿Qué fue más difícil de escribir?','¿Cómo se siente soltar eso?','¿Qué cambiaría si realmente lo soltaras?'],
+  3:['¿Ya usaste algún recurso esta semana?','¿Qué pasa en tu cuerpo cuando te estresas?','¿Cómo funciona tu BASE?'],
+  4:['¿Cómo estudiabas antes?','¿Cuándo aprendes mejor?','¿Qué parte del método LEARN ya haces?'],
+  5:['¿Qué evento trajiste?','¿Cómo te hablaste en ese momento?','¿Qué sería más útil decirte?'],
+  6:['¿Cómo tomás decisiones difíciles?','¿Qué dice tu brújula sobre esto?','¿Qué harías si no tuvieras miedo?'],
+  7:['¿Qué cambió en ti desde S1?','¿Qué te llevas al nuevo planeta?','¿Qué le dirías a quien empieza esto?'],
+};
+const SK='mdv_v2';
+let current=0,chatHistory=[],loading=false,studentName='';
+const rawData={
+  nombre:'',
+  f1_descripcion:'',f1_cuesta:'',f1_importa:'',f1_dificil:'',f1_destino:'',f1_palabra:'',
+  f2_f1_nombre:'',f2_f1_evidencia:'',f2_f2_nombre:'',f2_f2_evidencia:'',f2_f3_nombre:'',f2_f3_evidencia:'',f2_lema:'',
+  f3_mio:'',f3_ajeno:'',f3_voz:'',f3_soltar:'',f3_frase:'',
+  f3_contacto_solo:'',f3_contacto_estres:'',f3_contacto_desorient:'',f3_contacto_decision:'',f3_contacto_celebrar:'',
+  f4_cuerpo:'',f4_cabeza:'',f4_r1_que:'',f4_r1_cuando:'',f4_r2_que:'',f4_r2_cuando:'',f4_r3_que:'',f4_r3_cuando:'',
+  f5_mejor:'',f5_bloqueo:'',f5_retiene:'',f5_noentiendo:'',f5_protocolo:'',f5_descubri:'',
+  f6_hechos:'',f6_medije:'',f6_util:'',f6_trato:'',f6_frase:'',
+  f7_bien:'',f7_mal:'',f7_criterios:'',f7_p1:'',f7_p2:'',f7_p3:'',
+  f8_saber:'',f8_sostiene:'',f8_cuando:'',f8_quiero:'',f8_carta:'',
+};
+const completed=new Set();
+function save(key){rawData[key]=document.getElementById(key)?.value||'';saveSession();}
+function saveSession(){localStorage.setItem(SK,JSON.stringify({data:rawData,completed:[...completed],current,nombre:studentName}));}
+function loadSession(){
+  try{
+    const s=JSON.parse(localStorage.getItem(SK)||'null');
+    if(!s)return;
+    Object.assign(rawData,s.data||{});
+    (s.completed||[]).forEach(c=>completed.add(c));
+    if(s.current!==undefined)current=s.current;
+    if(s.nombre)studentName=s.nombre;
+  }catch(e){}
+}
+function getSystem(){
+  const ses=SESSIONS[current];
+  let s=`Eres KIBO, el tutor del programa "Listo para la U" de Centro La Dehesa.\n\nTu función es acompañar a jóvenes de 16 a 18 años en la transición al nuevo planeta — la universidad. Operas entre sesiones presenciales: el joven ya vivió algo en sala, y llega a ti para procesarlo y registrarlo en su Manual de Vuelo.\n\nQUIÉN ERES:\nEres un acompañante — no un coach, no un terapeuta, no un profesor.\nTienes curiosidad genuina por lo que trae el joven. Hablas en tuteo chileno — natural, sin voseo.\nEres cálido pero no efusivo. Directo pero no frío. Presente sin invadir.\n\nLO QUE NUNCA HACES:\n- No das consejos directos\n- No evalúas si lo que trajo está bien o mal\n- No propones texto para que copie en su ficha\n- No profundizas en dinámicas familiares intensas\n- No haces más de una pregunta por turno\n- No usas jerga terapéutica ni de coaching positivo\n- No escribes más de 4 oraciones + una pregunta\n- No usas listas ni bullets — hablas en prosa natural\n\nCUANDO EL JOVEN LLEGA ACTIVADO:\n→ Nombra lo que ves: "Parece que llegás con bastante movimiento interno."\n→ Ofrece un ancla: "¿Qué tal si tomás tres respiraciones lentas antes de entrar? Yo espero."\n\nCUANDO LLEGA A ALGO IMPORTANTE:\n→ "Eso que dijiste — ¿lo habías puesto en palabras antes?"\n\nCUANDO ALGO ES DIFUSO:\n→ "¿Hay una palabra, imagen o gesto que capture eso?"\n\nCUANDO EL CONTENIDO ES PESADO:\n→ "¿Hay algo esta semana, aunque sea pequeño, que se haya sentido diferente?"\n\nAYUDA PRÁCTICA: Si pregunta algo concreto del kit, respóndelo directamente.\n\nSOBRE EL MANUAL DE VUELO: Cuando llegue a algo que vale registrar: "¿Cómo lo pondrías en tu ficha?"\n\nAPERTURA: Abre con algo simple: "¿Qué te traés de esta semana?" o "¿Qué pasó desde la sesión?"\n\nEL PROGRAMA:\nMetáfora: pasar del colegio a la U es como cambiar de planeta. El programa es el entrenamiento antes del despegue.\nCompetencia central: autonomía interior — sostenerse desde recursos propios.\n4 fases: Reconocimiento (S1-S2) · Equipo de vuelo (S3-S4) · Gravedad cero (S5-S6) · Habitabilidad (S7-S8)\nFlight Kit: BASE · CONNECT · LEARN · CORE · ORBIT — los 5 Puntos de Equilibrio.\n\n`;
+  s+=`CONTEXTO DEL JOVEN:\n`;
+  if(studentName)s+=`Nombre: "${studentName}"\n`;
+  if(rawData.f1_descripcion)s+=`S1 — Cómo se describe: "${rawData.f1_descripcion}"\n`;
+  if(rawData.f1_dificil)s+=`S1 — Cuando algo se pone difícil: "${rawData.f1_dificil}"\n`;
+  if(rawData.f1_importa)s+=`S1 — Lo que más le importa: "${rawData.f1_importa}"\n`;
+  if(rawData.f1_palabra)s+=`S1 — Palabra desde donde parte: "${rawData.f1_palabra}"\n`;
+  if(rawData.f2_f1_nombre)s+=`S2 — Fortaleza 1: "${rawData.f2_f1_nombre}"\n`;
+  if(rawData.f2_f2_nombre)s+=`S2 — Fortaleza 2: "${rawData.f2_f2_nombre}"\n`;
+  if(rawData.f2_f3_nombre)s+=`S2 — Fortaleza 3: "${rawData.f2_f3_nombre}"\n`;
+  if(rawData.f2_lema)s+=`S2 — Lema de misión: "${rawData.f2_lema}"\n`;
+  if(rawData.f3_mio)s+=`S3 — Lo que quiere genuinamente: "${rawData.f3_mio}"\n`;
+  if(rawData.f3_soltar)s+=`S3 — Lo que decidió soltar: "${rawData.f3_soltar}"\n`;
+  if(rawData.f3_contacto_solo)s+=`S3 — A quien llama cuando se siente solo/a: "${rawData.f3_contacto_solo}"\n`;
+  if(rawData.f3_contacto_estres)s+=`S3 — A quien llama estresado/a: "${rawData.f3_contacto_estres}"\n`;
+  if(rawData.f4_r1_que)s+=`S4 — Recurso 1: "${rawData.f4_r1_que}"\n`;
+  if(rawData.f4_r2_que)s+=`S4 — Recurso 2: "${rawData.f4_r2_que}"\n`;
+  if(rawData.f4_r3_que)s+=`S4 — Recurso 3: "${rawData.f4_r3_que}"\n`;
+  if(rawData.f5_protocolo)s+=`S5 — Protocolo de estudio: "${rawData.f5_protocolo}"\n`;
+  if(rawData.f6_frase)s+=`S6 — Frase reguladora: "${rawData.f6_frase}"\n`;
+  if(rawData.f7_criterios)s+=`S7 — Criterios para decidir: "${rawData.f7_criterios}"\n`;
+  if(rawData.f7_p1)s+=`S7 — Pregunta de brújula 1: "${rawData.f7_p1}"\n`;
+  s+=`\nSESIÓN ACTIVA: ${ses.num} · ${ses.label} · Fase: ${ses.fase}\n`;
+  s+=`Pregunta central: "${ses.pregunta}"\n`;
+  s+=`Acompaña desde esta pregunta sin nombrarla explícitamente.\n\n`;
+  const fieldVal=mainFieldContent();
+  if(!fieldVal||fieldVal.trim().length<5){
+    s+=`El joven acaba de abrir esta sesión y no ha escrito nada todavía.\nAbre con una pregunta simple y abierta. No expliques ni instruyas — solo pregunta.\n`;
+  } else {
+    const words=fieldVal.trim().split(/\s+/).length;
+    s+=`Lo que el joven escribió en la ficha activa:\n"${fieldVal}"\n\n`;
+    if(words<25){s+=`Escribió poco. Refleja brevemente y haz UNA pregunta que abra un poco más.\n`;}
+    else{s+=`Escribió con sustancia. Refleja lo esencial en una oración. Luego haz UNA pregunta que lleve un paso más adentro.\nCuando llegue a algo que vale registrar, pregunta: "¿Cómo lo pondrías en tu ficha?"\nNunca propongas texto para copiar.\n`;}
+  }
+  return s;
+}
+function mainFieldContent(){
+  const maps={
+    0:()=>[rawData.f1_descripcion,rawData.f1_cuesta,rawData.f1_importa,rawData.f1_dificil,rawData.f1_destino].filter(Boolean).join(' / '),
+    1:()=>[rawData.f2_f1_nombre,rawData.f2_f2_nombre,rawData.f2_f3_nombre,rawData.f2_lema].filter(Boolean).join(' / '),
+    2:()=>[rawData.f3_mio,rawData.f3_ajeno,rawData.f3_soltar,rawData.f3_frase].filter(Boolean).join(' / '),
+    3:()=>[rawData.f4_cuerpo,rawData.f4_cabeza,rawData.f4_r1_que,rawData.f4_r2_que,rawData.f4_r3_que].filter(Boolean).join(' / '),
+    4:()=>[rawData.f5_mejor,rawData.f5_bloqueo,rawData.f5_protocolo].filter(Boolean).join(' / '),
+    5:()=>[rawData.f6_hechos,rawData.f6_medije,rawData.f6_util,rawData.f6_frase].filter(Boolean).join(' / '),
+    6:()=>[rawData.f7_bien,rawData.f7_mal,rawData.f7_criterios,rawData.f7_p1].filter(Boolean).join(' / '),
+    7:()=>[rawData.f8_saber,rawData.f8_sostiene,rawData.f8_carta].filter(Boolean).join(' / '),
+  };
+  return maps[current]?maps[current]():'';
+}
+function renderSidebar(){
+  const pct=Math.round(completed.size/8*100);
+  const groups=[{label:'Fase 1 · Reconocimiento',ids:[0,1]},{label:'Fase 2 · Equipo de vuelo',ids:[2,3]},{label:'Fase 3 · Gravedad cero',ids:[4,5]},{label:'Fase 4 · Habitabilidad',ids:[6,7]}];
+  let html=`<div class="sb-logo"><div class="sb-tag">Listo para la U · ${studentName||'Manual de Vuelo'}</div><div class="sb-name">Manual de <span>Vuelo</span></div></div>`;
+  groups.forEach(g=>{
+    html+=`<div class="sb-group"><div class="sb-group-label">${g.label}</div>`;
+    g.ids.forEach(id=>{
+      const s=SESSIONS[id];const fc=FASE_CLASS[id+1];
+      const cls=(current===id?'active ':'')+(completed.has(id)?'done ':'');
+      html+=`<button class="sb-item ${fc} ${cls}" onclick="goTo(${id})"><span class="sb-dot"></span>${s.num} · ${s.label}<span class="sb-check">✓</span></button>`;
+    });
+    html+=`</div>`;
+  });
+  html+=`<div class="sb-footer"><div class="sb-pct-row"><span>Completado</span><span>${pct}%</span></div><div class="sb-bar"><div class="sb-fill" style="width:${pct}%;background:var(${FASE_COLORS[current+1]||'--f1'})"></div></div></div>`;
+  html+=`<button class="btn-clear" onclick="clearData()">Borrar mis datos</button>`;
+  document.getElementById('sidebar').innerHTML=html;
+}
+function renderSessionNav(){
+  const nav=document.getElementById('session-nav');
+  nav.innerHTML=SESSIONS.map(s=>{
+    const fc=FASE_CLASS[s.id+1];const cls=current===s.id?'active ':'';
+    const dot=`<span class="nav-dot-small" style="background:var(${FASE_COLORS[s.id+1]})"></span>`;
+    return `<button class="nav-btn ${fc} ${cls}" onclick="goTo(${s.id})">${dot}${s.num}</button>`;
+  }).join('');
+}
+function renderForm(){
+  const ses=SESSIONS[current];const fi=ses.faseIdx;
+  const color=`var(--f${fi})`;const colorM=`var(--f${fi}m)`;const colorL=`var(--f${fi}l)`;
+  document.getElementById('bc-title').textContent=`${ses.num} · ${ses.label}`;
+  const concepto=CONCEPTOS[current];const kit=KITS[current];
+  let html='';
+  html+=`<div class="eyebrow" style="color:${colorM}">${ses.fase} · ${ses.num} de 8</div>`;
+  html+=`<div class="sec-title">${ses.label}</div>`;
+  html+=`<div class="sec-pregunta" style="color:${colorM}">${ses.pregunta}</div>`;
+  if(concepto){
+    html+=`<div class="concepto-vuelo" style="background:${colorL};border-color:${color}">
+      <div class="concepto-vuelo-label" style="color:${colorM}">Concepto de vuelo</div>
+      <div class="concepto-vuelo-text" style="color:${color}">${concepto.texto}</div>
+      <div class="concepto-cuando"><div class="concepto-cuando-label" style="color:${colorM}">Cuándo te va a servir esto</div>
+      <div class="concepto-cuando-text" style="color:${color}">${concepto.cuando}</div></div>
+    </div>`;
+  }
+  html+=renderFicha(current,fi,color,colorM,colorL);
+  if(kit){
+    html+=`<div class="kit-box" style="background:${colorL}">
+      <div class="kit-label" style="color:${colorM}">${kit.label}</div>
+      <div class="kit-content" style="color:${color};white-space:pre-line">${kit.content}</div>
+    </div>`;
+  }
+  html+=`<div class="progress-wrap"><div class="progress-row"><span class="progress-label">Fichas completadas</span><span class="progress-label">${completed.size} de 8</span></div><div class="progress-bar"><div class="progress-fill" style="width:${completed.size/8*100}%;background:${color}"></div></div></div>`;
+  const prev=current>0?current-1:null;const next=current<7?current+1:null;
+  html+=`<div class="nav-row">
+    ${prev!==null?`<button class="btn btn-secondary" onclick="goTo(${prev})">← Anterior</button>`:''}
+    ${next!==null?`<button class="btn btn-primary" onclick="advance(${current},${next})" style="background:${color}">Guardar y continuar →</button>`:`<button class="btn btn-primary" onclick="markDone(${current})" style="background:${color}">✓ Completar programa</button>`}
+  </div>`;
+  document.getElementById('form-panel').innerHTML=html;
+  loadFieldValues();
+}
+function renderFicha(idx,fi,color,colorM,colorL){
+  const a=(id,ph,rows=3)=>`<textarea id="${id}" rows="${rows}" placeholder="${ph}" oninput="save('${id}')"></textarea>`;
+  const inp=(id,ph,big=false)=>`<input type="text" id="${id}" placeholder="${ph}" oninput="save('${id}')" ${big?`style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;font-style:normal"`:''}>`; 
+  const card=(content,label='',hint='')=>`<div class="field-card">${label?`<div class="field-label" style="color:${colorM}">${label}</div>`:''}${hint?`<div class="field-hint">${hint}</div>`:''}${content}</div>`;
+  const fort=(n,nk,ek)=>`<div class="fortaleza-block"><div class="fortaleza-num" style="background:${colorL};color:${color}">Fortaleza ${n}</div><div class="fortaleza-fields"><div class="field-label" style="color:${colorM}">Nombre</div>${inp(nk,'Una palabra o frase corta...',true)}<div class="field-label" style="color:${colorM};margin-top:6px">El momento donde la vi en mi vida</div>${a(ek,'Un momento concreto...',2)}</div></div>`;
+  const rec=(n,qk,ck)=>`<div class="recurso-block"><div class="recurso-num" style="background:${colorL};color:${color}">Recurso ${n}</div><div class="recurso-fields"><div><div class="field-label" style="color:${colorM}">Qué hago</div>${inp(qk,'El recurso concreto...')}</div><div><div class="field-label" style="color:${colorM}">Cuándo lo uso</div>${inp(ck,'La señal que lo necesito...')}</div></div></div>`;
+  const cont=(id,sit)=>`<div class="contacto-row"><span class="contacto-situacion">${sit}</span><div class="contacto-input">${inp(id,'Nombre...')}</div></div>`;
+  const fichas={
+    0:`${card(a('f1_descripcion','Lo que es verdad aunque no lo diga siempre...'),'Así me describo a mí mismo/a — sin filtros')}
+    <div class="grid-2">${card(a('f1_cuesta','Sin juzgarlo...'),'Lo que más me cuesta')}${card(a('f1_importa','Lo que me mueve de verdad...'),'Lo que más me importa')}</div>
+    ${card(a('f1_dificil','Mi patrón honesto...',2),'Cuando las cosas se ponen difíciles, yo...')}
+    ${card(a('f1_destino','En tus palabras...'),'Al terminar este viaje, me gustaría ser o sentirme...')}
+    ${card(inp('f1_palabra','Una sola palabra...',true),'Una palabra que resume desde dónde parto hoy')}`,
+    1:`${fort(1,'f2_f1_nombre','f2_f1_evidencia')}${fort(2,'f2_f2_nombre','f2_f2_evidencia')}${fort(3,'f2_f3_nombre','f2_f3_evidencia')}
+    <div class="field-card"><div class="lema-wrap"><div class="lema-label" style="color:${colorM}">Lema de misión · la frase que me llevo</div><input type="text" id="f2_lema" class="lema-input" placeholder="En tus palabras..." oninput="save('f2_lema')"></div></div>`,
+    2:`<div class="grid-2">${card(a('f3_mio','Sin filtro de lo que debería querer...',4),'Lo que quiero genuinamente')}${card(a('f3_ajeno','Las expectativas que cargo sin haber elegido...',4),'Lo que espera(n) de mí — que no elegí')}</div>
+    ${card(a('f3_voz','La voz interna que más aparece cuando fallo...',2),'La voz que más me pesa — ¿de quién es?')}
+    ${card(a('f3_soltar','Algo concreto que eliges dejar atrás...',2),'Lo que decido soltar')}
+    <div class="field-card"><div class="field-label" style="color:${colorM}">Mi tripulación en tierra · CONNECT</div><div class="field-hint">Saber a quién llamar antes de necesitarlo.</div>
+    ${cont('f3_contacto_solo','Cuando me sienta solo/a')}${cont('f3_contacto_estres','Cuando esté estresado/a')}${cont('f3_contacto_desorient','Cuando esté desorientado/a')}${cont('f3_contacto_decision','Cuando deba decidir algo difícil')}${cont('f3_contacto_celebrar','Cuando quiera celebrar')}</div>
+    <div class="field-card"><div class="lema-wrap"><div class="lema-label" style="color:${colorM}">Lo que quiero — sin explicarle a nadie</div><input type="text" id="f3_frase" class="lema-input" placeholder="En tus palabras..." oninput="save('f3_frase')"></div></div>`,
+    3:`<div class="grid-2">${card(a('f4_cuerpo','Lo que siento físicamente...',3),'En mi cuerpo aparece...')}${card(a('f4_cabeza','Los pensamientos que llegan...',3),'En mi cabeza aparece...')}</div>
+    ${rec(1,'f4_r1_que','f4_r1_cuando')}${rec(2,'f4_r2_que','f4_r2_cuando')}${rec(3,'f4_r3_que','f4_r3_cuando')}`,
+    4:`<div class="grid-2">${card(a('f5_mejor','Horario, lugar, condiciones...',3),'Aprendo mejor cuando...')}${card(a('f5_bloqueo','Lo que corta mi aprendizaje...',3),'Me bloqueo cuando...')}</div>
+    <div class="grid-2">${card(inp('f5_retiene','Leyendo / escuchando / haciendo / explicando...'),'Retengo mejor...')}${card(inp('f5_noentiendo','Mi respuesta honesta...'),'Cuando no entiendo algo, lo primero que hago es...')}</div>
+    ${card(a('f5_protocolo','No el ideal — lo que funciona para mí...',3),'Mi protocolo de estudio en agosto')}
+    <div class="field-card"><div class="lema-wrap"><div class="lema-label" style="color:${colorM}">Lo que descubrí hoy de cómo aprendo</div><input type="text" id="f5_descubri" class="lema-input" placeholder="Lo que no sabías o no habías nombrado..." oninput="save('f5_descubri')"></div></div>`,
+    5:`${card(a('f6_hechos','Sin interpretación, solo lo que ocurrió...',2),'Lo que pasó — solo los hechos')}
+    <div class="grid-2">${card(a('f6_medije','La interpretación que apareció...',3),'Lo que me dije a mí mismo/a')}${card(a('f6_util','No la versión positiva falsa...',3),'Lo que sería más útil decirme')}</div>
+    ${card(a('f6_trato','La diferencia entre los dos...',2),'Cómo me trato cuando fallo — cómo me gustaría tratarme')}
+    <div class="field-card"><div class="lema-wrap"><div class="lema-label" style="color:${colorM}">Mi frase reguladora — lo que me digo en la tormenta</div><input type="text" id="f6_frase" class="lema-input" placeholder="Tuya, no prestada..." oninput="save('f6_frase')"></div></div>`,
+    6:`<div class="grid-2">${card(a('f7_bien','En el cuerpo, en la cabeza...',3),'Cuando algo está bien para mí, siento...')}${card(a('f7_mal','La señal que me avisa...',3),'Cuando algo no está bien, siento...')}</div>
+    ${card(a('f7_criterios','No los que debería tener — los míos...',2),'Mis criterios para decidir')}
+    <div class="field-card"><div class="field-label" style="color:${colorM}">Mis preguntas de brújula</div><div class="field-hint">Las que me devuelven al centro cuando me pierdo</div>
+    <div style="margin-bottom:6px"><div style="font-size:9.5px;color:${colorM};margin-bottom:4px;letter-spacing:.08em;text-transform:uppercase;">Cuando no sé qué hacer</div>${inp('f7_p1','La pregunta que te devuelve al centro...')}</div>
+    <div style="margin-bottom:6px"><div style="font-size:9.5px;color:${colorM};margin-bottom:4px;letter-spacing:.08em;text-transform:uppercase;">Cuando el miedo decide por mí</div>${inp('f7_p2','La pregunta que interrumpe el miedo...')}</div>
+    <div><div style="font-size:9.5px;color:${colorM};margin-bottom:4px;letter-spacing:.08em;text-transform:uppercase;">Cuando necesito volver a mí</div>${inp('f7_p3','La que te ancla cuando todo se acelera...')}</div></div>`,
+    7:`<div class="f8-echo"><div class="f8-echo-label">Lo que escribí en S1 — desde dónde partí</div>
+    <div class="f8-echo-text">${rawData.f1_descripcion?`"${rawData.f1_descripcion.substring(0,150)}${rawData.f1_descripcion.length>150?'...':''}"`:rawData.f1_palabra?`Palabra de partida: "${rawData.f1_palabra}"`:' Completa S1 para ver tu punto de partida aquí.'}</div></div>
+    ${card(a('f8_saber','Lo que descubriste en este viaje...',3),'Lo que sé de mí ahora que no sabía al empezar')}
+    ${card(a('f8_sostiene','Tus recursos genuinos — los que verificaste...',2),'Lo que me sostiene cuando el entorno no lo hace')}
+    ${card(a('f8_cuando','Tu protocolo en la tormenta...',2),'Lo que haré cuando algo no salga como espero')}
+    ${card(a('f8_quiero','Lo que importa de verdad...',2),'Lo que quiero en agosto más allá del rendimiento')}
+    <div class="field-card"><div class="field-label" style="color:${colorM}">Carta a la versión de mí que llega a la U</div><div class="field-hint">Escríbele desde lo que sabes hoy</div>${a('f8_carta','Querido/a yo...',7)}</div>`,
+  };
+  return fichas[idx]||'';
+}
+function loadFieldValues(){Object.keys(rawData).forEach(k=>{const el=document.getElementById(k);if(el&&rawData[k])el.value=rawData[k];});}
+function goTo(idx){current=idx;saveSession();renderSidebar();renderSessionNav();renderForm();resetChat();document.querySelector('.form-panel')?.scrollTo(0,0);}
+function advance(from,to){completed.add(from);saveSession();goTo(to);}
+function markDone(idx){completed.add(idx);saveSession();renderSidebar();showToast('¡Programa completado! Tu Manual de Vuelo está listo.');}
+function renderIntro(){
+  document.getElementById('bc-title').textContent='Manual de Vuelo';
+  document.getElementById('session-nav').style.display='none';
+  document.getElementById('form-panel').innerHTML=`<div class="intro-screen">
+    <div class="intro-logo">Listo para la U · Centro La Dehesa</div>
+    <h1 class="intro-title">Tu documento<br>de viaje</h1>
+    <p class="intro-sub">8 fichas. Una por sesión. Todas tuyas.</p>
+    <div class="intro-phases">
+      <div class="intro-phase" style="background:var(--f1l);border-right:1px solid var(--border)"><div class="ip-num" style="color:var(--f1m)">Fase 01</div><div class="ip-name" style="color:var(--f1)">Reconoci-miento</div><div class="ip-sessions">S1 · S2</div></div>
+      <div class="intro-phase" style="background:var(--f2l);border-right:1px solid var(--border)"><div class="ip-num" style="color:var(--f2m)">Fase 02</div><div class="ip-name" style="color:var(--f2)">Equipo de vuelo</div><div class="ip-sessions">S3 · S4</div></div>
+      <div class="intro-phase" style="background:var(--f3l);border-right:1px solid var(--border)"><div class="ip-num" style="color:var(--f3m)">Fase 03</div><div class="ip-name" style="color:var(--f3)">Gravedad cero</div><div class="ip-sessions">S5 · S6</div></div>
+      <div class="intro-phase" style="background:var(--f4l)"><div class="ip-num" style="color:var(--f4m)">Fase 04</div><div class="ip-name" style="color:var(--f4)">Habita-bilidad</div><div class="ip-sessions">S7 · S8</div></div>
+    </div>
+    <div class="intro-name-wrap"><span class="intro-name-label">Tu nombre</span><input class="intro-name-input" id="intro-nombre" type="text" placeholder="Escribe tu nombre aquí" value="${studentName||''}"></div>
+    <div style="text-align:center;margin-top:28px">
+      <p class="intro-quote">"No es que los astronautas seamos más valientes que los demás.<br>Es que estamos meticulosamente preparados."</p>
+      <p class="intro-quote-attr">— Chris Hadfield · Comandante ISS</p>
+      <button class="intro-start" onclick="startApp()">Comenzar el viaje →</button>
+    </div>
+  </div>`;
+  initKiboIntro();
+}
+function startApp(){
+  const n=document.getElementById('intro-nombre')?.value.trim();
+  if(n)studentName=n;
+  rawData.nombre=studentName;
+  saveSession();
+  document.getElementById('session-nav').style.display='flex';
+  goTo(0);
+}
+function resetChat(){
+  chatHistory=[];
+  document.getElementById('chat-msgs').innerHTML='';
+  const welcome=`Hola${studentName?' '+studentName:''}. ¿Qué te traés de esta semana?`;
+  addMsg('ai',welcome);
+  chatHistory.push({role:'assistant',content:welcome});
+  renderQuickActions();
+}
+function initKiboIntro(){
+  chatHistory=[];
+  document.getElementById('chat-msgs').innerHTML='';
+  const m='Hola. Soy KIBO, tu tutor en este viaje. Estoy aquí para acompañarte entre sesiones. Escribe tu nombre arriba y empezamos cuando quieras.';
+  addMsg('ai',m);
+  chatHistory.push({role:'assistant',content:m});
+  document.getElementById('quick-wrap').innerHTML='';
+}
+function scrollDown(){const c=document.getElementById('chat-msgs');if(c)setTimeout(()=>c.scrollTop=c.scrollHeight,60);}
+function addMsg(role,text,isTyping=false){
+  const c=document.getElementById('chat-msgs');if(!c)return null;
+  const id='msg-'+Date.now()+'-'+Math.random().toString(36).slice(2);
+  const el=document.createElement('div');el.id=id;el.className='msg '+role;
+  if(isTyping){el.innerHTML=`<div class="msg-av ai">K</div><div class="msg-body"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;}
+  else{const safe=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');el.innerHTML=`<div class="msg-av ${role}">${role==='ai'?'K':'↗'}</div><div class="msg-body">${safe}</div>`;}
+  c.appendChild(el);scrollDown();return id;
+}
+function removeMsg(id){const el=document.getElementById(id);if(el)el.remove();}
+function setLoading(v){
+  loading=v;
+  const dot=document.getElementById('status-dot');const txt=document.getElementById('status-txt');
+  if(dot)dot.className=v?'status-dot thinking':'status-dot';
+  if(txt)txt.textContent=v?'Pensando…':'Lista';
+  document.getElementById('send-btn').disabled=v;
+  document.getElementById('chat-input').disabled=v;
+  renderQuickActions();
+}
+function renderQuickActions(){
+  const el=document.getElementById('quick-wrap');if(!el)return;
+  const qs=QUICK[current]||[];
+  el.innerHTML=qs.map(q=>`<button class="qbtn" ${loading?'disabled':''} onclick="sendMsg('${q.replace(/'/g,"\\'")}')">${q}</button>`).join('');
+}
+async function sendMsg(custom){
+  const inp=document.getElementById('chat-input');
+  const text=custom!==undefined?custom:(inp?inp.value.trim():'');
+  if(!text||loading)return;
+  if(inp&&custom===undefined)inp.value='';
+  addMsg('user',text);chatHistory.push({role:'user',content:text});
+  setLoading(true);const tid=addMsg('ai','',true);
+  try{
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:chatHistory,system:getSystem()})});
+    removeMsg(tid);
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||'HTTP '+res.status);}
+    const json=await res.json();const reply=json.reply||'Sin respuesta.';
+    chatHistory.push({role:'assistant',content:reply});addMsg('ai',reply);
+  }catch(err){removeMsg(tid);addMsg('ai','⚠️ '+(err.message||'Error al conectar. Intenta de nuevo.'));}
+  setLoading(false);
+}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2800);}
+function clearData(){if(!confirm('¿Borrar todo tu progreso? Esta acción no se puede deshacer.'))return;localStorage.removeItem(SK);location.reload();}
+loadSession();
+renderSidebar();
+if(!studentName){renderIntro();}
+else{document.getElementById('session-nav').style.display='flex';renderSessionNav();renderForm();resetChat();}
+</script>
+</body>
+</html>
