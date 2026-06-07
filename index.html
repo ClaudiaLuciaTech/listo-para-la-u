@@ -246,7 +246,21 @@ textarea::placeholder,input::placeholder{color:var(--ink3);font-style:italic;}
 <div class="s0-wrap" id="s0-wrap">
   <canvas class="s0-canvas" id="s0-canvas"></canvas>
 
-  <div class="s0-screen active" id="s0-sc1">
+  <!-- P0: nombre -->
+  <div class="s0-screen active" id="s0-sc0">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:20px;max-width:400px;width:100%;">
+      <div style="font-family:'Syne',sans-serif;font-size:clamp(22px,4vw,32px);font-weight:800;color:#F4F1EB;letter-spacing:-.02em;text-align:center;line-height:1.2;">Hola.<br>¿Cómo te llamas?</div>
+      <input id="s0-nombre" type="text" placeholder="Tu nombre..." 
+        style="background:transparent;border:none;border-bottom:1.5px solid rgba(244,241,235,0.3);color:#F4F1EB;font-family:'Lora',serif;font-size:20px;font-style:italic;text-align:center;outline:none;width:100%;padding:10px 4px;transition:border-color .2s;"
+        onfocus="this.style.borderBottomColor='rgba(244,241,235,0.8)'"
+        onblur="this.style.borderBottomColor='rgba(244,241,235,0.3)'"
+        onkeydown="if(event.key==='Enter')s0startWithName()"
+      >
+      <button class="s0-btn show" onclick="s0startWithName()" style="margin-top:8px;">Comenzar →</button>
+    </div>
+  </div>
+
+  <div class="s0-screen" id="s0-sc1">
     <div class="s0-lines">
       <div class="s0-line muted" id="s0l1">Estás a punto de dar</div>
       <div class="s0-line" id="s0l2" style="transition-delay:.4s">uno de los pasos más importantes</div>
@@ -421,6 +435,7 @@ const stars=Array.from({length:200},()=>({x:Math.random(),y:Math.random(),r:Math
 function s0go(n){
   document.querySelectorAll('.s0-screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('s0-sc'+n).classList.add('active');
+  if(n===1)s0animP1();
   if(n===2)s0animP2();
   if(n===3)s0animP3();
   if(n===4)s0animP4();
@@ -431,10 +446,17 @@ function s0finish(){
   localStorage.setItem('s0_seen','1');
   initApp();
 }
-// P1: aparece línea a línea, avanza solo
-const s0delays=[0,400,800,1500,2400];
-s0delays.forEach((d,i)=>{const el=document.getElementById('s0l'+(i+1));if(el)setTimeout(()=>el.classList.add('show'),d+200);});
-setTimeout(()=>s0go(2),4800);
+function s0startWithName(){
+  const n=document.getElementById('s0-nombre')?.value.trim();
+  if(n){studentName=n;rawData.nombre=n;saveAll();}
+  s0go(1);
+}
+
+function s0animP1(){
+  const s0delays=[0,400,800,1500,2400];
+  s0delays.forEach((d,i)=>{const el=document.getElementById('s0l'+(i+1));if(el)setTimeout(()=>el.classList.add('show'),d+200);});
+  setTimeout(()=>s0go(2),4800);
+}
 
 function s0animP2(){
   setTimeout(()=>document.getElementById('s0p2b1')?.classList.add('show'),300);
@@ -523,7 +545,7 @@ function mainFieldContent(){
 function renderSidebar(){
   const pct=Math.round(completed.size/8*100);
   const groups=[{l:'Fase 1 · Reconocimiento',ids:[0,1]},{l:'Fase 2 · Equipo de vuelo',ids:[2,3]},{l:'Fase 3 · Gravedad cero',ids:[4,5]},{l:'Fase 4 · Habitabilidad',ids:[6,7]}];
-  let h=`<div class="sb-logo"><div class="sb-tag">Listo para la U</div><div class="sb-name">Manual de <span>Vuelo</span></div></div>`;
+  let h=`<div class="sb-logo"><div class="sb-tag">Listo para la U</div><div class="sb-name">Manual de <span>Vuelo</span></div>${studentName?"<div style='font-size:10px;color:rgba(147,180,232,0.55);margin-top:3px;font-family:Lora,serif;font-style:italic;'>"+studentName+"</div>":""}</div>`;
   groups.forEach(g=>{
     h+=`<div class="sb-group"><div class="sb-group-label">${g.l}</div>`;
     g.ids.forEach(id=>{
@@ -563,7 +585,8 @@ function renderForm(){
   if(kit){h+=`<div class="kit-box" style="background:${colorL}"><div class="kit-label" style="color:${colorM}">${kit.label}</div><div class="kit-content" style="color:${color};white-space:pre-line">${kit.content}</div></div>`;}
   h+=`<div class="progress-wrap"><div class="progress-row"><span class="progress-label">Fichas completadas</span><span class="progress-label">${completed.size} de 8</span></div><div class="progress-bar"><div class="progress-fill" style="width:${completed.size/8*100}%;background:${color}"></div></div></div>`;
   const prev=current>0?current-1:null;const next=current<7?current+1:null;
-  h+=`<div class="nav-row">
+  h+=`<div class="nav-row" style="flex-wrap:wrap;gap:8px;">
+    ${getDownloadButtons(current)}
     ${prev!==null?`<button class="btn btn-secondary" onclick="goTo(${prev})">← Anterior</button>`:''}
     ${next!==null?`<button class="btn btn-primary" onclick="advance(${current},${next})" style="background:${color}">Guardar y continuar →</button>`:`<button class="btn btn-primary" onclick="markDone(${current})" style="background:${color}">✓ Completar programa</button>`}
   </div>`;
@@ -766,7 +789,7 @@ async function downloadModuloPDF(modIdx){
   doc.setFillColor(...col);doc.rect(0,0,210,28,'F');
   doc.setFillColor(232,93,74);doc.rect(0,28,210,1.5,'F');
   doc.setTextColor(232,238,248);doc.setFontSize(8);doc.setFont('helvetica','normal');
-  doc.text(ses.fase.toUpperCase()+' - '+ses.num+' DE 8',14,10);
+  doc.text(ses.fase.toUpperCase()+' - '+ses.num+' DE 8'+(studentName?' - '+studentName.toUpperCase():''),14,10);
   doc.setFontSize(20);doc.setFont('helvetica','bold');doc.text(ses.label,14,22);
   doc.setTextColor(...col);doc.setFontSize(10);doc.setFont('helvetica','italic');doc.text(ses.pregunta,14,36);
   await addKiboWatermark(doc,150,180,45,55,0.05);
@@ -794,7 +817,7 @@ async function downloadModuloPDF(modIdx){
   doc.setFillColor(244,241,235);doc.rect(0,282,210,15,'F');
   await addKiboWatermark(doc,12,283,8,10,0.22);
   doc.setTextColor(154,150,144);doc.setFontSize(7);doc.setFont('helvetica','normal');
-  doc.text('Manual de Vuelo - Listo para la U - Centro La Dehesa',22,290);
+  doc.text('Manual de Vuelo'+(studentName?' - '+studentName:'')+'  -  Listo para la U',22,290);
   doc.text(ses.num+' - p.1',196,290,{align:'right'});
   doc.save('ManualDeVuelo_'+ses.num+'.pdf');
   showToast(ses.num+' descargado');
