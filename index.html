@@ -659,7 +659,7 @@ function renderFicha(idx,fi,color,colorM,colorL){
     1:`<div style="margin-bottom:10px;font-size:11px;color:var(--ink2);line-height:1.6;">Elige entre <strong style="color:var(--ink)">3 y 5 fortalezas</strong> que puedas ver en tu propia historia — no las que crees que deberías tener.</div>
     <button onclick="openFortalezasModal()" style="width:100%;padding:9px;border:0.5px solid var(--f1);border-radius:5px;background:none;color:var(--f1);font-size:12px;cursor:pointer;margin-bottom:10px;font-family:'DM Mono',monospace;transition:background .15s;" onmouseover="this.style.background='var(--f1l)'" onmouseout="this.style.background='none'">Explorar mis fortalezas →</button>
     <div id="fort-slots"></div>
-    <div class="field-card"><div class="lema-wrap"><div class="lema-label" style="color:\${colorM}">Lema de misión · la frase que me llevo</div><input type="text" id="f2_lema" class="lema-input" placeholder="En tus palabras..." oninput="save('f2_lema')"></div></div>\`,
+    <div class="field-card"><div class="lema-wrap"><div class="lema-label" style="color:\${colorM}">Lema de misión · la frase que me llevo</div><input type="text" id="f2_lema" class="lema-input" placeholder="En tus palabras..." oninput="save('f2_lema')"></div></div>`,
     2:`<div class="grid-2">${card(a('f3_mio','Sin filtro...',4),'Lo que quiero genuinamente')}${card(a('f3_ajeno','Las expectativas que cargo sin haber elegido...',4),'Lo que espera(n) de mí — que no elegí')}</div>
     ${card(a('f3_voz','La voz interna que más aparece cuando fallo...',2),'La voz que más me pesa')}
     ${card(a('f3_soltar','Algo concreto que elijo dejar atrás...',2),'Lo que decido soltar')}
