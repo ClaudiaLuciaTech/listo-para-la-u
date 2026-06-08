@@ -351,6 +351,28 @@ textarea::placeholder,input::placeholder{color:var(--ink3);font-style:italic;}
   </div>
 </div>
 
+
+<!-- MODAL FORTALEZAS -->
+<div id="forts-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:12px;border:0.5px solid var(--border);width:min(680px,95vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:14px 18px 10px;border-bottom:0.5px solid var(--border);flex-shrink:0;display:flex;align-items:flex-start;justify-content:space-between;">
+      <div>
+        <div style="font-size:15px;font-weight:500;color:var(--ink);margin-bottom:2px;">Explora tus fortalezas</div>
+        <div style="font-size:11px;color:var(--ink3);">Elige las que puedes ver en tu propia historia. Mínimo 3, máximo 5.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span id="forts-counter" style="font-size:12px;font-weight:500;color:var(--ink3);">0 seleccionadas</span>
+        <button onclick="closeForts()" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--ink3);padding:2px 6px;">✕</button>
+      </div>
+    </div>
+    <div id="forts-body" style="flex:1;overflow-y:auto;padding:12px 18px;"></div>
+    <div style="padding:10px 18px;border-top:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+      <button onclick="closeForts()" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--ink3);padding:6px 10px;">Cancelar</button>
+      <button id="forts-confirm" onclick="confirmForts()" disabled style="background:#0F2347;color:#E8EEF8;border:none;border-radius:5px;padding:8px 18px;font-size:12px;cursor:pointer;font-family:'DM Mono',monospace;opacity:.4;">Guardar mis fortalezas →</button>
+    </div>
+  </div>
+</div>
+
 <!-- APP PRINCIPAL -->
 <div class="app" id="main-app" style="display:none">
   <nav class="sidebar" id="sidebar"></nav>
@@ -436,7 +458,7 @@ let current=0,chatHistory=[],loading=false,studentName='';
 const rawData={
   nombre:'',
   f1_descripcion:'',f1_cuesta:'',f1_importa:'',f1_dificil:'',f1_destino:'',f1_palabra:'',
-  f2_f1_nombre:'',f2_f1_evidencia:'',f2_f2_nombre:'',f2_f2_evidencia:'',f2_f3_nombre:'',f2_f3_evidencia:'',f2_lema:'',
+  f2_forts:'',f2_f1_nombre:'',f2_f1_evidencia:'',f2_f2_nombre:'',f2_f2_evidencia:'',f2_f3_nombre:'',f2_f3_evidencia:'',f2_lema:'',
   f3_mio:'',f3_ajeno:'',f3_voz:'',f3_soltar:'',f3_frase:'',
   f3_contacto_solo:'',f3_contacto_estres:'',f3_contacto_desorient:'',f3_contacto_decision:'',f3_contacto_celebrar:'',
   f4_cuerpo:'',f4_cabeza:'',f4_r1_que:'',f4_r1_cuando:'',f4_r2_que:'',f4_r2_cuando:'',f4_r3_que:'',f4_r3_cuando:'',
@@ -634,8 +656,10 @@ function renderFicha(idx,fi,color,colorM,colorL){
     ${card(a('f1_dificil','Mi patrón honesto...',2),'Cuando las cosas se ponen difíciles, yo...')}
     ${card(a('f1_destino','En tus palabras...'),'Al terminar este viaje, me gustaría ser o sentirme...')}
     ${card(inp('f1_palabra','Una sola palabra...',true),'Una palabra que resume desde dónde parto hoy')}`,
-    1:`${fort(1,'f2_f1_nombre','f2_f1_evidencia')}${fort(2,'f2_f2_nombre','f2_f2_evidencia')}${fort(3,'f2_f3_nombre','f2_f3_evidencia')}
-    <div class="field-card"><div class="lema-wrap"><div class="lema-label" style="color:${colorM}">Lema de misión · la frase que me llevo</div><input type="text" id="f2_lema" class="lema-input" placeholder="En tus palabras..." oninput="save('f2_lema')"></div></div>`,
+    1:`<div style="margin-bottom:10px;font-size:11px;color:var(--ink2);line-height:1.6;">Elige entre <strong style="color:var(--ink)">3 y 5 fortalezas</strong> que puedas ver en tu propia historia — no las que crees que deberías tener.</div>
+    <button onclick="openFortalezasModal()" style="width:100%;padding:9px;border:0.5px solid var(--f1);border-radius:5px;background:none;color:var(--f1);font-size:12px;cursor:pointer;margin-bottom:10px;font-family:'DM Mono',monospace;transition:background .15s;" onmouseover="this.style.background='var(--f1l)'" onmouseout="this.style.background='none'">Explorar mis fortalezas →</button>
+    <div id="fort-slots"></div>
+    <div class="field-card"><div class="lema-wrap"><div class="lema-label" style="color:\${colorM}">Lema de misión · la frase que me llevo</div><input type="text" id="f2_lema" class="lema-input" placeholder="En tus palabras..." oninput="save('f2_lema')"></div></div>\`,
     2:`<div class="grid-2">${card(a('f3_mio','Sin filtro...',4),'Lo que quiero genuinamente')}${card(a('f3_ajeno','Las expectativas que cargo sin haber elegido...',4),'Lo que espera(n) de mí — que no elegí')}</div>
     ${card(a('f3_voz','La voz interna que más aparece cuando fallo...',2),'La voz que más me pesa')}
     ${card(a('f3_soltar','Algo concreto que elijo dejar atrás...',2),'Lo que decido soltar')}
@@ -667,7 +691,7 @@ function renderFicha(idx,fi,color,colorM,colorL){
   };
   return fichas[idx]||'';
 }
-function loadFieldValues(){Object.keys(rawData).forEach(k=>{const el=document.getElementById(k);if(el&&rawData[k])el.value=rawData[k];});}
+function loadFieldValues(){Object.keys(rawData).forEach(k=>{const el=document.getElementById(k);if(el&&rawData[k])el.value=rawData[k];});if(current===1){selectedForts=rawData.f2_forts?JSON.parse(rawData.f2_forts||'[]'):[];renderFortSlots();}}
 function goTo(idx){current=idx;saveAll();renderSidebar();renderSessionNav();renderForm();resetChat();document.querySelector('.form-panel')?.scrollTo(0,0);}
 function advance(from,to){completed.add(from);saveAll();goTo(to);}
 function markDone(idx){completed.add(idx);saveAll();renderSidebar();showToast('¡Programa completado! Tu Manual de Vuelo está listo.');}
@@ -976,6 +1000,135 @@ function getDownloadButtons(modIdx){
     btns+=`<button class="btn btn-secondary" onclick="downloadAcordeon()" style="font-size:11px;padding:7px 14px;">&#8595; Flight Kit</button>`;
   }
   return kiboHtml+btns;
+}
+
+
+// ═══════════════════════════════════════════════════
+// MODAL DE FORTALEZAS — IEPP
+// ═══════════════════════════════════════════════════
+const FAMS_DATA = [
+  {n:'Cómo pienso',color:'#1B3A6B',bg:'#E8EEF8',forts:[
+    {id:'curiosidad',n:'Curiosidad',tag:'Siempre quieres saber más — aunque nadie te lo pida',q:'¿Hay algún tema del que sabes mucho más que la mayoría, solo porque alguna vez te picó la curiosidad?'},
+    {id:'analisis',n:'Análisis',tag:'Piensas antes de actuar — y eso te sirve',q:'¿Hay alguna decisión donde tomarte el tiempo de analizar bien te ayudó a elegir mejor?'},
+    {id:'innovacion',n:'Innovación',tag:'Ves soluciones donde otros ven problemas',q:'¿Recuerdas alguna vez que encontraste una solución que los demás no habían visto?'},
+  ]},
+  {n:'Cómo me muevo',color:'#7C2D12',bg:'#F9EDE8',forts:[
+    {id:'persistencia',n:'Persistencia',tag:'No te rindes cuando algo importa de verdad',q:'¿Hay algo que lograste que requirió mucho esfuerzo continuo, y que muchos otros habrían abandonado?'},
+    {id:'crecimiento',n:'Crecimiento',tag:'Los retos no te achican — te mueven',q:'¿Hay alguna vez que te enfrentaste a algo difícil y saliste de ahí siendo más capaz?'},
+    {id:'valentia',n:'Valentía',tag:'Actúas aunque tengas miedo',q:'¿Recuerdas alguna vez que hiciste algo que te daba miedo real, y lo hiciste igual?'},
+  ]},
+  {n:'Cómo me relaciono',color:'#4C1D95',bg:'#F0EBF8',forts:[
+    {id:'cooperacion',n:'Cooperación',tag:'Trabajar con otros te sale natural',q:'¿Hay algún proyecto grupal donde tu forma de participar hizo que el equipo funcionara mejor?'},
+    {id:'honestidad',n:'Honestidad',tag:'Eres igual por dentro y por fuera',q:'¿Hay alguna situación donde fuiste honesto/a aunque era lo más difícil o menos conveniente?'},
+    {id:'humor',n:'Humor',tag:'Sabes encontrar lo ligero en lo pesado',q:'¿Recuerdas algún momento difícil donde tu sentido del humor ayudó a relajar el ambiente?'},
+  ]},
+  {n:'Cómo me regulo',color:'#065F46',bg:'#E6F4EF',forts:[
+    {id:'armonia',n:'Armonía',tag:'Sabes mantenerte en calma cuando todo el mundo pierde la suya',q:'¿Hay alguna situación de mucha presión donde mantuviste la calma y eso ayudó?'},
+    {id:'conocimiento_emocional',n:'Conocimiento emocional',tag:'Sabes lo que sientes — y eso importa',q:'¿Puedes recordar una vez donde entender bien lo que sentías te ayudó a tomar una mejor decisión?'},
+    {id:'manejo_emocional',n:'Manejo emocional',tag:'Las emociones difíciles no te borran',q:'¿Recuerdas alguna vez que algo te afectó fuerte pero lograste procesarlo y seguir adelante?'},
+  ]},
+  {n:'Cómo me sostengo',color:'#92400E',bg:'#FEF3C7',forts:[
+    {id:'gratitud',n:'Gratitud',tag:'Sabes ver lo bueno — incluso cuando hay mucho malo',q:'¿Hay algo o alguien en tu vida por lo que sientes una gratitud real y concreta?'},
+    {id:'positividad',n:'Positividad',tag:'Tu mirada tiende a ver salidas, no solo muros',q:'¿Hay alguna situación complicada donde tu manera de ver las cosas ayudó a encontrar una salida?'},
+    {id:'vitalidad',n:'Vitalidad',tag:'Hay cosas que te cargan de energía — y lo sabes',q:'¿Qué tipo de actividades o momentos te dejan con más energía de la que tenías antes de empezar?'},
+  ]},
+];
+
+let selectedForts = rawData.f2_forts ? JSON.parse(rawData.f2_forts||'[]') : [];
+
+function openFortalezasModal(){
+  document.getElementById('forts-overlay').style.display='flex';
+  renderFortsModal();
+}
+function closeForts(){
+  document.getElementById('forts-overlay').style.display='none';
+}
+function renderFortsModal(){
+  const body=document.getElementById('forts-body');
+  const counter=document.getElementById('forts-counter');
+  const btn=document.getElementById('forts-confirm');
+  const n=selectedForts.length;
+  counter.textContent=n+' seleccionada'+(n!==1?'s':'')+(n>=3?' ✓':'');
+  counter.style.color=n>=3?'#065F46':'var(--ink3)';
+  btn.disabled=n<3;btn.style.opacity=n>=3?'1':'0.4';
+  body.innerHTML=FAMS_DATA.map(f=>`
+    <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:${f.color};margin:14px 0 6px;padding-bottom:4px;border-bottom:0.5px solid var(--border);">${f.n}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px;">
+      ${f.forts.map(ft=>{
+        const sel=selectedForts.includes(ft.id);
+        const dis=!sel&&selectedForts.length>=5;
+        return `<div onclick="${dis?'':'toggleFort(\''+ft.id+'\''+')'}" style="border:0.5px solid ${sel?f.color:'var(--border)'};border-radius:8px;padding:9px 10px;cursor:${dis?'not-allowed':'pointer'};background:${sel?f.bg:'var(--white)'};opacity:${dis?'.4':'1'};transition:all .15s;">
+          <div style="font-size:12px;font-weight:500;color:${sel?f.color:'var(--ink)'};margin-bottom:2px;">${ft.n}${sel?'<span style="display:inline-block;font-size:8px;background:'+f.color+';color:white;border-radius:3px;padding:1px 5px;margin-left:5px;">✓</span>':''}</div>
+          <div style="font-size:10px;color:var(--ink2);line-height:1.45;margin-bottom:4px;font-style:italic;">${ft.tag}</div>
+          <div style="font-size:9px;color:var(--ink3);line-height:1.4;">${ft.q}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+}
+function toggleFort(id){
+  if(selectedForts.includes(id)){selectedForts=selectedForts.filter(s=>s!==id);}
+  else{if(selectedForts.length>=5)return;selectedForts.push(id);}
+  renderFortsModal();
+}
+function confirmForts(){
+  if(selectedForts.length<3)return;
+  rawData.f2_forts=JSON.stringify(selectedForts);
+  // Guardar nombres en los campos existentes para compatibilidad
+  const allForts=FAMS_DATA.flatMap(f=>f.forts);
+  ['f2_f1_nombre','f2_f2_nombre','f2_f3_nombre'].forEach((key,i)=>{
+    const ft=allForts.find(f=>f.id===selectedForts[i]);
+    if(ft)rawData[key]=ft.n;
+  });
+  saveAll();
+  closeForts();
+  renderFortSlots();
+}
+function renderFortSlots(){
+  const el=document.getElementById('fort-slots');
+  if(!el)return;
+  const allForts=FAMS_DATA.flatMap(f=>f.forts);
+  const fam=id=>FAMS_DATA.find(f=>f.forts.some(ft=>ft.id===id));
+  let html='';
+  for(let i=0;i<5;i++){
+    const id=selectedForts[i];
+    const req=i<3?' (requerida)':' (opcional)';
+    if(id){
+      const ft=allForts.find(f=>f.id===id);
+      const fm=fam(id);
+      html+=`<div style="border:0.5px solid ${fm.color};border-radius:8px;padding:9px 12px;background:${fm.bg};margin-bottom:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:${fm.color};margin-bottom:3px;">Fortaleza ${i+1}</div>
+            <div style="font-size:13px;font-weight:500;color:${fm.color};">${ft.n}</div>
+            <div style="font-size:10px;color:var(--ink2);font-style:italic;margin-top:2px;">${ft.tag}</div>
+          </div>
+          <button onclick="removeFortSlot('${id}')" style="background:none;border:0.5px solid var(--border);border-radius:4px;padding:3px 8px;font-size:10px;color:var(--ink3);cursor:pointer;">✕</button>
+        </div>
+        <div style="margin-top:6px;padding-top:6px;border-top:0.5px solid rgba(0,0,0,0.08);">
+          <div style="font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:${fm.color};margin-bottom:3px;">¿Cuándo la viste en tu historia?</div>
+          <textarea id="f2_ev_${id}" rows="2" placeholder="Un momento concreto..." oninput="saveEvidencia('${id}')" style="width:100%;border:0.5px solid rgba(0,0,0,0.1);border-radius:4px;background:rgba(255,255,255,0.7);padding:6px 8px;font-family:'DM Mono',monospace;font-size:11px;color:var(--ink);resize:none;outline:none;">${rawData['f2_ev_'+id]||''}</textarea>
+        </div>
+      </div>`;
+    } else {
+      html+=`<div style="border:0.5px dashed var(--border);border-radius:8px;padding:9px 12px;background:var(--bg2);margin-bottom:6px;opacity:.6;">
+        <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px;">Fortaleza ${i+1}${req}</div>
+        <div style="font-size:12px;color:var(--ink3);font-style:italic;">Por elegir →</div>
+      </div>`;
+    }
+  }
+  el.innerHTML=html;
+}
+function saveEvidencia(id){
+  const el=document.getElementById('f2_ev_'+id);
+  if(el)rawData['f2_ev_'+id]=el.value;
+  saveAll();
+}
+function removeFortSlot(id){
+  selectedForts=selectedForts.filter(s=>s!==id);
+  rawData.f2_forts=JSON.stringify(selectedForts);
+  saveAll();
+  renderFortSlots();
 }
 
 
